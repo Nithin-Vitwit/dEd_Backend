@@ -18,9 +18,36 @@ mongoose.connect(MONGO_URI)
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.log(err));
 
+// Configure Multer for Thumbnail Uploads
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
 // Root Endpoint for Health Check
 app.get('/', (req, res) => {
     res.send('dED Backend is running! 🚀');
+});
+
+// Temporary Thumbnail Upload Endpoint (Returns Base64 to save storage cost)
+app.post('/api/upload-thumbnail', upload.single('thumbnail'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ msg: 'No file uploaded' });
+        }
+        // Convert buffer to base64
+        const b64 = Buffer.from(req.file.buffer).toString('base64');
+        const mimeType = req.file.mimetype;
+        const dataURI = `data:${mimeType};base64,${b64}`;
+
+        // Return as "url" so frontend logic works
+        res.json({ url: dataURI });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
 });
 
 // Routes
