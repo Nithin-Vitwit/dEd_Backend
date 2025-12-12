@@ -18,6 +18,11 @@ mongoose.connect(MONGO_URI)
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.log(err));
 
+// Root Endpoint for Health Check
+app.get('/', (req, res) => {
+    res.send('dED Backend is running! 🚀');
+});
+
 // Routes
 // 1. Register Asset (Course)
 app.post('/api/assets', async (req, res) => {
